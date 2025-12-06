@@ -1,0 +1,350 @@
+/* Global Overrides & Bootstrap Polish */
+:root {
+    --primary: #4f46e5;
+    --primary-light: #e0e7ff;
+    --primary-dark: #3730a3;
+    --bg: #f8f9fa;
+    --gt-color: #ef4444;
+    --rev-color: #10b981;
+    --text-dark: #111827;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg);
+}
+
+/* Premium Gradients */
+.gradient-text {
+    background: linear-gradient(135deg, #4f46e5, #ec4899);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Card Animation */
+.animate-up {
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Slot Buttons */
+.slot-btn {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+    border-radius: 50px;
+    /* Pill shape */
+    transition: all 0.2s;
+    border: 1px solid #e5e7eb;
+    color: #4b5563;
+}
+
+.btn-check:checked+.slot-btn {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+}
+
+/* Sticky Column for Screen */
+.sticky-col {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background-color: #ffffff !important;
+    border-right: 2px solid #f3f4f6;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+}
+
+/* ============================
+   MODERN PRINT / PDF STYLES
+   ============================ */
+
+.pdf-container {
+    display: none;
+}
+
+@media print {
+    @page {
+        size: landscape;
+        margin: 0.5cm;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        /* SUBTLE BACKGROUND SHADE (Warm Paper) */
+        background-color: #fdfbf7 !important;
+        font-family: 'Outfit', sans-serif;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color: var(--text-dark);
+    }
+
+    /* Hide Screen Elements */
+    .printable-screen,
+    .no-print,
+    .btn,
+    .navbar,
+    footer {
+        display: none !important;
+    }
+
+    /* Show PDF Container */
+    .pdf-container {
+        display: block !important;
+        width: 100%;
+        background-color: #fdfbf7;
+    }
+
+    /* Page Layout */
+    .pdf-page {
+        page-break-after: always;
+        height: 100vh;
+        width: 100%;
+        padding: 25px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        border: none;
+        background-color: #fdfbf7;
+        /* Consistent bg */
+    }
+
+    /* 1. Modern Header */
+    .pdf-header {
+        background: linear-gradient(to right, var(--primary), var(--primary-dark));
+        color: white;
+        padding: 15px 25px;
+        border-radius: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .pdf-header h1 {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        margin: 0;
+        text-transform: uppercase;
+    }
+
+    .pdf-header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 12px;
+        font-weight: 300;
+    }
+
+    /* 2. Stats Pills */
+    .pdf-stats {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .p-stat {
+        background: white;
+        padding: 8px 20px;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-dark);
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+
+    .p-stat strong {
+        color: var(--primary);
+    }
+
+    /* 3. Section Title */
+    .pdf-header-sm {
+        margin-bottom: 10px;
+        border-left: 5px solid var(--primary);
+        padding-left: 10px;
+    }
+
+    .pdf-header-sm h3 {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0;
+        text-transform: uppercase;
+    }
+
+    /* 4. Rounded Tables */
+    .pdf-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        font-size: 10px;
+        table-layout: fixed;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        background: white;
+    }
+
+    .pdf-table th {
+        background: #f1f5f9 !important;
+        /* Very light cool grey */
+        color: #475569;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 8px 4px;
+        border-bottom: 1px solid #e2e8f0;
+        border-right: 1px solid #e2e8f0;
+        font-size: 9px;
+        letter-spacing: 0.5px;
+    }
+
+    .pdf-table th:last-child {
+        border-right: none;
+    }
+
+    .pdf-table td {
+        background: white;
+        padding: 6px 4px;
+        text-align: center;
+        vertical-align: middle;
+        border-bottom: 1px solid #f8fafc;
+        border-right: 1px solid #f8fafc;
+        color: #334155;
+        height: 28px;
+        word-wrap: break-word;
+    }
+
+    .pdf-table td:last-child {
+        border-right: none;
+    }
+
+    .pdf-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Date Column */
+    .pdf-table th:first-child {
+        width: 90px;
+    }
+
+    .date-cell {
+        font-weight: 800;
+        color: var(--primary);
+        text-align: left;
+        padding-left: 10px !important;
+        background-color: #fcfcfc !important;
+    }
+
+    /* Merged Cells (SUBTLE PILL STYLE) */
+    .merged-cell-pdf {
+        font-weight: 800;
+        text-transform: uppercase;
+        font-size: 10px;
+        letter-spacing: 1px;
+    }
+
+    /* Events - SUBTLE RED */
+    tr:has(.grand-test),
+    td.grand-test {
+        background-color: #fff1f2 !important;
+        /* Rose 50 */
+        border-bottom: 1px solid #ffe4e6;
+    }
+
+    td.grand-test {
+        background-color: #ffe4e6 !important;
+        /* Rose 100 badge */
+        color: #be123c !important;
+        /* Rose 700 text */
+        border-radius: 6px;
+        /* No solid red background, just subtle tint */
+    }
+
+    /* Events - SUBTLE GREEN */
+    tr:has(.weekly-revision),
+    td.weekly-revision {
+        background-color: #f0fdf4 !important;
+        /* Emerald 50 */
+        border-bottom: 1px solid #dcfce7;
+    }
+
+    td.weekly-revision {
+        background-color: #dcfce7 !important;
+        /* Emerald 100 badge */
+        color: #15803d !important;
+        /* Emerald 700 text */
+        border-radius: 6px;
+    }
+
+    /* Summary Page Styles */
+    .summary-sm {
+        width: 100%;
+        border-radius: 12px;
+        font-size: 11px;
+    }
+
+    .summary-sm th {
+        background: var(--primary) !important;
+        color: white !important;
+        border: none;
+        padding: 10px;
+    }
+
+    .summary-sm td {
+        padding: 8px 15px;
+        text-align: left;
+    }
+
+    .pdf-section h2 {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 10px;
+        display: inline-block;
+        border-bottom: 3px solid var(--primary-light);
+    }
+
+    /* Footer / Quote - Modern Card */
+    .pdf-footer {
+        margin-top: auto;
+    }
+
+    .quote-box {
+        background: white;
+        border: 1px solid #f1f5f9;
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        font-style: italic;
+        color: #64748b;
+        font-size: 11px;
+        position: relative;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.01);
+    }
+
+    .quote-box::before {
+        content: '“';
+        font-size: 40px;
+        color: var(--primary-light);
+        position: absolute;
+        top: -10px;
+        left: 20px;
+        font-family: serif;
+    }
+}

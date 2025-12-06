@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEET PG Timetable Gen</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="bg-light">
+
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-primary gradient-text">NEET PG Timetable Generator</h1>
+            <p class="lead text-muted">Create your personalized study schedule in seconds.</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-7">
+                <form action="/generate" method="POST" id="timetableForm" class="needs-validation" novalidate>
+
+                    <!-- 1. Dates -->
+                    <div class="card shadow-sm border-0 mb-4 animate-up">
+                        <div class="card-body p-4">
+                            <h2 class="h5 fw-bold text-dark mb-3">1. Study Period</h2>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="from_date" class="form-label">Start Date</label>
+                                    <input type="date" class="form-control form-control-lg" id="from_date"
+                                        name="from_date" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="to_date" class="form-label">End Date</label>
+                                    <input type="date" class="form-control form-control-lg" id="to_date" name="to_date"
+                                        required>
+                                </div>
+                            </div>
+                            <div id="date_info" class="form-text text-primary fw-bold mt-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Revision -->
+                    <div class="card shadow-sm border-0 mb-4 animate-up" id="rev_card">
+                        <div class="card-body p-4">
+                            <h2 class="h5 fw-bold text-dark mb-3">2. Revision Phase</h2>
+                            <p class="text-muted small mb-2" id="rev_hint">Please enter dates above first.</p>
+                            <div class="input-group input-group-lg">
+                                <input type="number" class="form-control" id="revision_days" name="revision_days"
+                                    min="0" disabled required placeholder="Days">
+                                <span class="input-group-text">Days</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Daily Hours -->
+                    <div class="card shadow-sm border-0 mb-4 animate-up">
+                        <div class="card-body p-4">
+                            <h2 class="h5 fw-bold text-dark mb-3">3. Daily Study Hours</h2>
+                            <label class="form-label">Hours per day (6-14)</label>
+                            <input type="range" class="form-range" id="daily_hours" name="daily_hours" min="6" max="14"
+                                value="10">
+                            <div class="d-flex justify-content-between text-muted small">
+                                <span>6 hrs</span>
+                                <span class="fw-bold text-primary fs-5"><span id="target_hours_display">10</span>
+                                    hrs</span>
+                                <span>14 hrs</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Time Slots -->
+                    <div class="card shadow-sm border-0 mb-4 animate-up">
+                        <div class="card-body p-4">
+                            <h2 class="h5 fw-bold text-dark mb-3">4. Select Time Slots</h2>
+                            <p class="text-muted small">Select exactly <strong id="target_hours"
+                                    class="text-primary">10</strong> slots.</p>
+
+                            <div class="slots-container d-flex flex-wrap gap-2 mb-3">
+                                <!-- Generated Checkboxes for cleaner loop -->
+                                {% set slots = [
+                                ('04:00-05:00', '4-5 am'), ('05:00-06:00', '5-6 am'), ('06:00-07:00', '6-7 am'),
+                                ('07:00-08:00', '7-8 am'), ('08:00-09:00', '8-9 am'), ('09:00-10:00', '9-10 am'),
+                                ('10:00-11:00', '10-11 am'), ('11:00-12:00', '11-12 pm'), ('12:00-13:00', '12-1 pm'),
+                                ('13:00-14:00', '1-2 pm'), ('14:00-15:00', '2-3 pm'), ('15:00-16:00', '3-4 pm'),
+                                ('16:00-17:00', '4-5 pm'), ('17:00-18:00', '5-6 pm'), ('18:00-19:00', '6-7 pm'),
+                                ('19:00-20:00', '7-8 pm'), ('20:00-21:00', '8-9 pm'), ('21:00-22:00', '9-10 pm'),
+                                ('22:00-23:00', '10-11 pm')
+                                ] %}
+                                {% for val, label in slots %}
+                                <div class="form-check form-check-inline m-0">
+                                    <input class="btn-check" type="checkbox" name="time_slots" id="slot_{{loop.index}}"
+                                        value="{{val}}">
+                                    <label class="btn btn-outline-secondary btn-sm slot-btn"
+                                        for="slot_{{loop.index}}">{{label}}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <button type="button" id="slots_okay_btn" class="btn btn-outline-primary w-100"
+                                disabled>Confirm Slots</button>
+                        </div>
+                    </div>
+
+                    <!-- 5. Settings -->
+                    <div class="card shadow-sm border-0 mb-5 animate-up">
+                        <div class="card-body p-4">
+                            <h2 class="h5 fw-bold text-dark mb-3">5. Preferences</h2>
+
+                            <div class="mb-4">
+                                <label class="form-label d-block fw-semibold mb-2">Grand Test Frequency</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="grant_test_frequency" id="gt_once"
+                                        value="once_weekly" checked>
+                                    <label class="btn btn-outline-primary" for="gt_once">Weekly</label>
+
+                                    <input type="radio" class="btn-check" name="grant_test_frequency" id="gt_twice"
+                                        value="twice_weekly">
+                                    <label class="btn btn-outline-primary" for="gt_twice">Bi-Weekly</label>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="form-label d-block fw-semibold mb-2">Scheduling Method</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="method" id="m_seq"
+                                        value="subject_completion_wise" checked>
+                                    <label class="btn btn-outline-primary" for="m_seq">Subject Wise</label>
+
+                                    <input type="radio" class="btn-check" name="method" id="m_mix" value="mixed">
+                                    <label class="btn btn-outline-primary" for="m_mix">Mixed (Blocks)</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="d-grid mb-5">
+                        <button type="submit" class="btn btn-primary btn-lg shadow-lg" id="generate_btn" disabled>
+                            Generate Timetable 🚀
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logic Script -->
+    <script>
+        const fromDate = document.getElementById('from_date');
+        const toDate = document.getElementById('to_date');
+        const revInput = document.getElementById('revision_days');
+        const revParam = document.getElementById('rev_hint');
+        const dailyHours = document.getElementById('daily_hours');
+        const targetHours = document.getElementById('target_hours');
+        const targetHoursDisplay = document.getElementById('target_hours_display');
+        const slotChecks = document.querySelectorAll('input[name="time_slots"]');
+        const slotOkBtn = document.getElementById('slots_okay_btn');
+        const genBtn = document.getElementById('generate_btn');
+        let slotsConfirmed = false;
+        let isDurationValid = false;
+
+        // Date Logic
+        function updateDateLogic() {
+            if (fromDate.value && toDate.value) {
+                const d1 = new Date(fromDate.value);
+                const d2 = new Date(toDate.value);
+                const diffTime = Math.abs(d2 - d1);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Inclusive
+
+                document.getElementById('date_info').innerText = "Total Duration: " + diffDays + " Days";
+
+                if (diffDays < 14) {
+                    revParam.innerHTML = "<span class='text-danger'>Error: Minimum 14 days required.</span>";
+                    revInput.disabled = true;
+                    isDurationValid = false;
+                    alert("Total days should be more than or equal to 14");
+                    updateGenBtn();
+                    return;
+                } else {
+                    revParam.className = "text-muted small mb-2";
+                    isDurationValid = true;
+                }
+
+                revInput.disabled = false;
+
+                if (diffDays <= 60) {
+                    revInput.value = diffDays;
+                    revInput.setAttribute('readonly', true);
+                    revParam.innerText = "Duration <= 60 days: Full period is Revision.";
+                } else {
+                    revInput.removeAttribute('readonly');
+                    const minRev = Math.floor(diffDays / 4);
+                    const maxRev = Math.floor(diffDays / 2);
+                    revInput.min = minRev;
+                    revInput.max = maxRev;
+                    revInput.value = minRev;
+                    revParam.innerText = `Recommended Revision: ${minRev} - ${maxRev} days`;
+                }
+            }
+            updateGenBtn();
+        }
+
+        fromDate.addEventListener('change', updateDateLogic);
+        toDate.addEventListener('change', updateDateLogic);
+
+        // Hours Logic
+        dailyHours.addEventListener('input', () => {
+            targetHours.innerText = dailyHours.value;
+            targetHoursDisplay.innerText = dailyHours.value;
+            slotsConfirmed = false;
+            slotOkBtn.innerHTML = "Confirm Slots";
+            slotOkBtn.classList.remove('btn-success', 'text-white');
+            slotOkBtn.classList.add('btn-outline-primary');
+            updateGenBtn();
+            validateSlots();
+        });
+
+        // Slots Logic
+        function validateSlots() {
+            const goal = parseInt(dailyHours.value);
+            let count = 0;
+            slotChecks.forEach(c => { if (c.checked) count++; });
+
+            if (count === goal) {
+                if (!slotsConfirmed) {
+                    slotOkBtn.disabled = false;
+                }
+                // Disable unchecked
+                slotChecks.forEach(c => {
+                    if (!c.checked) c.disabled = true;
+                });
+            } else {
+                slotOkBtn.disabled = true;
+                slotsConfirmed = false;
+                slotOkBtn.innerHTML = "Confirm Slots";
+                slotOkBtn.classList.remove('btn-success', 'text-white');
+                slotOkBtn.classList.add('btn-outline-primary');
+                updateGenBtn();
+
+                if (count < goal) {
+                    slotChecks.forEach(c => c.disabled = false);
+                }
+            }
+        }
+
+        slotChecks.forEach(chk => {
+            chk.addEventListener('change', () => {
+                const goal = parseInt(dailyHours.value);
+                let count = 0;
+                slotChecks.forEach(c => { if (c.checked) count++; });
+
+                if (count > goal) {
+                    chk.checked = false;
+                    alert("You cannot select more slots than Daily Hours!");
+                }
+                validateSlots();
+            });
+        });
+
+        slotOkBtn.addEventListener('click', () => {
+            const goal = parseInt(dailyHours.value);
+            let count = 0;
+            slotChecks.forEach(c => { if (c.checked) count++; });
+
+            if (count === goal) {
+                slotsConfirmed = true;
+                slotOkBtn.innerHTML = "Confirmed <i class='ms-2'>✅</i>";
+                slotOkBtn.classList.remove('btn-outline-primary');
+                slotOkBtn.classList.add('btn-success', 'text-white');
+                slotOkBtn.disabled = true;
+                updateGenBtn();
+            }
+        });
+
+        function updateGenBtn() {
+            if (slotsConfirmed && fromDate.value && toDate.value && isDurationValid) {
+                genBtn.disabled = false;
+            } else {
+                genBtn.disabled = true;
+            }
+        }
+    </script>
+</body>
+
+</html>
